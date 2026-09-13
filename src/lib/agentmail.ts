@@ -12,13 +12,21 @@ function requiredEnv(name: string): string | null {
   return value || null;
 }
 
+/** Josh preference: notify + agent are the same monitored inbox (send-to-self). */
+export const DEFAULT_AGENTMAIL_INBOX = "jjammer@physhlab.com";
+
 export function getAgentMailConfig() {
   const apiKey = requiredEnv("AGENTMAIL_API_KEY");
-  const notifyInbox = requiredEnv("AGENTMAIL_NOTIFY_INBOX");
-  const agentInbox = requiredEnv("AGENTMAIL_AGENT_INBOX");
-  if (!apiKey || !notifyInbox || !agentInbox) {
+  if (!apiKey) {
     return null;
   }
+  // Prefer explicit AGENTMAIL_AGENT_INBOX; fall back to Josh's monitored inbox.
+  const agentInbox =
+    requiredEnv("AGENTMAIL_AGENT_INBOX") ?? DEFAULT_AGENTMAIL_INBOX;
+  // Notify From-inbox: default to the same address (send-to-self). Do not force
+  // hscapp2@ — Josh's org API key that owns jjammer@ should send as jjammer@.
+  const notifyInbox =
+    requiredEnv("AGENTMAIL_NOTIFY_INBOX") ?? agentInbox;
   return { apiKey, notifyInbox, agentInbox };
 }
 
@@ -117,7 +125,7 @@ export async function notifyContactSubmission(
     return {
       ok: false,
       error:
-        "AgentMail is not configured (AGENTMAIL_API_KEY / AGENTMAIL_NOTIFY_INBOX / AGENTMAIL_AGENT_INBOX).",
+        "AgentMail is not configured (set AGENTMAIL_API_KEY; optional AGENTMAIL_NOTIFY_INBOX / AGENTMAIL_AGENT_INBOX default to jjammer@physhlab.com).",
     };
   }
 
@@ -148,7 +156,7 @@ export async function notifyBookingCreated(
     return {
       ok: false,
       error:
-        "AgentMail is not configured (AGENTMAIL_API_KEY / AGENTMAIL_NOTIFY_INBOX / AGENTMAIL_AGENT_INBOX).",
+        "AgentMail is not configured (set AGENTMAIL_API_KEY; optional AGENTMAIL_NOTIFY_INBOX / AGENTMAIL_AGENT_INBOX default to jjammer@physhlab.com).",
     };
   }
 
