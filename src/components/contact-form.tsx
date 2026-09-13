@@ -9,12 +9,15 @@ import { Textarea } from "@/components/ui/textarea";
 
 export function ContactForm() {
   const [sent, setSent] = useState(false);
+  const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
-    const data = new FormData(e.currentTarget);
+    setSent(false);
+    const form = e.currentTarget;
+    const data = new FormData(form);
     const name = String(data.get("name") || "").trim();
     const email = String(data.get("email") || "").trim();
     const message = String(data.get("message") || "").trim();
@@ -22,8 +25,33 @@ export function ContactForm() {
       setError("Please fill in your name, email, and message.");
       return;
     }
-    setSent(true);
-    e.currentTarget.reset();
+
+    setPending(true);
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, message }),
+      });
+      const payload = (await res.json().catch(() => ({}))) as {
+        error?: string;
+      };
+      if (!res.ok) {
+        setError(
+          payload.error ||
+            "We could not send your message. Please try again or email the lodge.",
+        );
+        return;
+      }
+      setSent(true);
+      form.reset();
+    } catch {
+      setError(
+        "Network error while sending. Check your connection and try again.",
+      );
+    } finally {
+      setPending(false);
+    }
   }
 
   return (
@@ -33,11 +61,17 @@ export function ContactForm() {
     >
       <div className="space-y-2">
         <Label htmlFor="name">Name</Label>
-        <Input id="name" name="name" placeholder="Your name" />
+        <Input id="name" name="name" placeholder="Your name" disabled={pending} />
       </div>
       <div className="space-y-2">
         <Label htmlFor="email">Email</Label>
-        <Input id="email" name="email" type="email" placeholder="you@example.com" />
+        <Input
+          id="email"
+          name="email"
+          type="email"
+          placeholder="you@example.com"
+          disabled={pending}
+        />
       </div>
       <div className="space-y-2">
         <Label htmlFor="message">Message</Label>
@@ -46,28 +80,30 @@ export function ContactForm() {
           name="message"
           rows={5}
           placeholder="Tell us about your group and preferred dates"
+          disabled={pending}
         />
       </div>
       {error ? (
         <Alert variant="destructive">
-          <AlertTitle>Missing info</AlertTitle>
+          <AlertTitle>Could not send</AlertTitle>
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       ) : null}
       {sent ? (
         <Alert>
-          <AlertTitle>Message ready</AlertTitle>
+          <AlertTitle>Message sent</AlertTitle>
           <AlertDescription>
-            Thanks—this demo form confirms locally. For a live conversation,
-            call or email the lodge directly.
+            Thanks — your note is on its way to the lodge team. We will follow
+            up by email soon.
           </AlertDescription>
         </Alert>
       ) : null}
       <Button
         type="submit"
+        disabled={pending}
         className="bg-[var(--brand-forest)] text-[var(--brand-cream)] hover:bg-[var(--brand-forest-deep)]"
       >
-        Send message
+        {pending ? "Sending…" : "Send message"}
       </Button>
     </form>
   );
