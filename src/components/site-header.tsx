@@ -9,11 +9,11 @@ import { ButtonLink } from "@/components/button-link";
 import { cn } from "@/lib/utils";
 import { brand, logo } from "@/lib/brand";
 
+/** Desktop text links only — reservation CTA is the gold button. */
 const links = [
   { href: "/", label: "Home" },
   { href: "/gallery", label: "Gallery" },
-  { href: "/hunts", label: "Hunting Packages" },
-  { href: "/book", label: "Make a Reservation" },
+  { href: "/hunts", label: "Packages" },
   { href: "/contact", label: "Contact Us" },
 ];
 
@@ -31,32 +31,29 @@ export function SiteHeader() {
           : "sticky top-0 border-b border-white/10 bg-[var(--brand-forest-deep)]/95 backdrop-blur",
       )}
     >
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-5 md:px-6">
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4 md:px-6">
         <Link
           href="/"
-          className="flex items-center gap-3 text-[var(--brand-cream)]"
+          className="shrink-0 text-[var(--brand-cream)]"
           aria-label={brand.name}
         >
           <Image
             src={logo.srcDisplay}
             alt={logo.alt}
-            width={48}
-            height={48}
-            className="size-10 object-contain md:size-12"
+            width={72}
+            height={72}
+            className="size-14 object-contain md:size-[4.25rem]"
             priority
             unoptimized
           />
-          <span className="font-display text-lg tracking-[0.08em] uppercase md:text-xl">
-            {brand.name}
-          </span>
         </Link>
-        <nav className="hidden items-center gap-7 md:flex">
+        <nav className="hidden items-center gap-5 lg:gap-6 md:flex">
           {links.map((link) => (
             <Link
               key={link.href}
               href={link.href}
               className={cn(
-                "text-sm tracking-wide text-[var(--brand-cream)]/85 transition hover:text-[var(--brand-gold)]",
+                "whitespace-nowrap text-sm tracking-wide text-[var(--brand-cream)]/85 transition hover:text-[var(--brand-gold)]",
                 pathname === link.href && "text-[var(--brand-gold)]",
               )}
             >
@@ -65,7 +62,7 @@ export function SiteHeader() {
           ))}
           <ButtonLink
             href="/book"
-            className="bg-[var(--brand-gold)] text-[var(--brand-ink)] hover:bg-[var(--brand-gold-bright)]"
+            className="shrink-0 whitespace-nowrap bg-[var(--brand-gold)] text-[var(--brand-ink)] hover:bg-[var(--brand-gold-bright)]"
           >
             Make a Reservation
           </ButtonLink>

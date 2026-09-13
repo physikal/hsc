@@ -6,8 +6,7 @@
 export const siteNav = [
   { href: "/", label: "Home" },
   { href: "/gallery", label: "Gallery" },
-  { href: "/hunts", label: "Hunting Packages" },
-  { href: "/book", label: "Make a Reservation" },
+  { href: "/hunts", label: "Packages" },
   { href: "/contact", label: "Contact Us" },
 ] as const;
 
