@@ -31,24 +31,24 @@ Contact Us and booking submissions send mail via AgentMail so a monitoring agent
 
 Send-to-self (`From` = `To` = `jjammer@…`) lands with AgentMail labels `sent` only — **not** `received` / `unread` — so inbox watchers that filter on those labels miss the message. Forms still return `{"ok":true}`; the gap is watchability, not form success.
 
-Recommended production values:
+Recommended production values (HSC service-org API key currently on Vercel):
 
 ```bash
 AGENTMAIL_API_KEY=am_…
-AGENTMAIL_NOTIFY_INBOX=hsc-notify@physhlab.com
+AGENTMAIL_NOTIFY_INBOX=hscapp2@agentmail.to
 AGENTMAIL_AGENT_INBOX=jjammer@physhlab.com
 ```
 
-Fallback From (also verified received/unread): `hscapp2@agentmail.to`.
+If you switch to a Josh-org key that owns `hsc-notify@physhlab.com`, set NOTIFY to that inbox instead. Do **not** set NOTIFY=`jjammer@`.
 
 | Field | Value |
 | --- | --- |
-| From | notify inbox |
-| To | agent inbox |
+| From | notify inbox (`hscapp2@` with HSC key) |
+| To | agent inbox (`jjammer@`) |
 | Reply-To | customer email |
 | Subjects | `[HSC Contact] …` / `[HSC Booking] …` |
 
-If notify equals agent at runtime, the app coerces From to `hsc-notify@physhlab.com` and logs a warning.
+If notify equals agent at runtime, the app coerces From to `hscapp2@agentmail.to` and logs a warning.
 
 Without `AGENTMAIL_API_KEY`, APIs still return success and skip send (logged).
 
@@ -56,16 +56,16 @@ Without `AGENTMAIL_API_KEY`, APIs still return success and skip send (logged).
 
 1. Submit Contact Us or create a booking on production.
 2. In AgentMail, open `jjammer@physhlab.com`.
-3. Confirm a new message with From `hsc-notify@physhlab.com` (not `jjammer@`), labels **`received`** and **`unread`**, subject `[HSC Contact]…` or `[HSC Booking]…`.
+3. Confirm a new message with From `hscapp2@agentmail.to` (not `jjammer@`), labels **`received`** and **`unread`**, subject `[HSC Contact]…` or `[HSC Booking]…`.
 
 ### Vercel env checklist
 
 Set on Production (and Preview if needed), then redeploy:
 
-1. `AGENTMAIL_API_KEY` — key that can send as the notify inbox
-2. `AGENTMAIL_NOTIFY_INBOX=hsc-notify@physhlab.com`
+1. `AGENTMAIL_API_KEY` — HSC service-org key that can send as `hscapp2@agentmail.to`
+2. `AGENTMAIL_NOTIFY_INBOX=hscapp2@agentmail.to`  (**≠** AGENT)
 3. `AGENTMAIL_AGENT_INBOX=jjammer@physhlab.com`
-4. Confirm NOTIFY ≠ AGENT in the dashboard
+4. Confirm NOTIFY ≠ AGENT in the dashboard (if NOTIFY is still `jjammer@`, code coerces to `hscapp2@`)
 
 Helper (after `vercel login`): `/tmp/configure-hsc-agentmail-env.sh` on the agent machine, or Project → Settings → Environment Variables.
 
