@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { notifyBookingCreatedInBackground } from "@/lib/agentmail";
+import { notifyBookingCreated } from "@/lib/agentmail";
 import { requireAdminOrAgent } from "@/lib/auth";
 import {
   bookingReceiptCookieName,
@@ -45,8 +45,15 @@ export async function POST(req: NextRequest) {
   try {
     const body = createSchema.parse(await req.json());
     const booking = await createBooking(body);
-    // Side-effect only — booking succeeds even if AgentMail notify fails.
-    notifyBookingCreatedInBackground(booking);
+    // Await notify (like contact). Fire-and-forget races Vercel freeze and
+    // often times out before AgentMail send completes — booking still succeeds.
+    const notify = await notifyBookingCreated(booking);
+    if (!notify.ok) {
+      console.error(
+        "[agentmail] booking created but notify failed:",
+        notify.error,
+      );
+    }
 
     const response = NextResponse.json({ booking }, { status: 201 });
     // Persist a per-guest receipt cookie so confirmation works across

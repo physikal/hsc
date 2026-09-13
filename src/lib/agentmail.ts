@@ -192,11 +192,8 @@ export async function notifyBookingCreated(
   }
 }
 
-/** Fire-and-forget wrapper — never throws. */
-export function notifyBookingCreatedInBackground(
-  booking: BookingWithDetails,
-): void {
-  void notifyBookingCreated(booking).catch((error) => {
-    console.error("[agentmail] booking notify background error:", error);
-  });
-}
+/**
+ * Prefer awaiting notifyBookingCreated from the route handler.
+ * Fire-and-forget is unsafe on Vercel serverless: the isolate freezes after
+ * the response and AgentMail send often times out ("timeout") before delivery.
+ */
