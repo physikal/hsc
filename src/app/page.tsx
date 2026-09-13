@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ButtonLink } from "@/components/button-link";
+import { DayInTheLifeVideo } from "@/components/day-in-the-life-video";
 import { brand, images } from "@/lib/brand";
 import { homeCopy, siteCta } from "@/lib/site-content";
 
@@ -77,6 +78,8 @@ export default function HomePage() {
           />
         </div>
       </section>
+
+      <DayInTheLifeVideo />
 
       <section className="bg-[var(--brand-forest)] text-[var(--brand-cream)]">
         <div className="mx-auto grid max-w-6xl gap-8 px-4 py-16 md:grid-cols-3 md:px-6 md:py-20">
