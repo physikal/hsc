@@ -17,10 +17,12 @@ export const DEFAULT_AGENT_INBOX = "jjammer@physhlab.com";
 /**
  * From-inbox for app notifies. MUST differ from the agent inbox — send-to-self
  * lands with labels `sent` (not `received`/`unread`) and agent watchers miss it.
- * Prefer Josh-org `hsc-notify@physhlab.com`; `hscapp2@agentmail.to` also works
- * with the HSC service-org API key.
+ *
+ * Production Vercel uses the HSC service-org API key, which can send as
+ * `hscapp2@agentmail.to` (verified received/unread on jjammer@). Prefer that.
+ * `hsc-notify@physhlab.com` only works with a Josh-org key that owns it.
  */
-export const DEFAULT_NOTIFY_INBOX = "hsc-notify@physhlab.com";
+export const DEFAULT_NOTIFY_INBOX = "hscapp2@agentmail.to";
 
 export function getAgentMailConfig() {
   const apiKey = requiredEnv("AGENTMAIL_API_KEY");
@@ -136,7 +138,7 @@ export async function notifyContactSubmission(
     return {
       ok: false,
       error:
-        "AgentMail is not configured (set AGENTMAIL_API_KEY; defaults: NOTIFY=hsc-notify@physhlab.com, AGENT=jjammer@physhlab.com).",
+        "AgentMail is not configured (set AGENTMAIL_API_KEY; defaults: NOTIFY=hscapp2@agentmail.to, AGENT=jjammer@physhlab.com).",
     };
   }
 
@@ -167,7 +169,7 @@ export async function notifyBookingCreated(
     return {
       ok: false,
       error:
-        "AgentMail is not configured (set AGENTMAIL_API_KEY; defaults: NOTIFY=hsc-notify@physhlab.com, AGENT=jjammer@physhlab.com).",
+        "AgentMail is not configured (set AGENTMAIL_API_KEY; defaults: NOTIFY=hscapp2@agentmail.to, AGENT=jjammer@physhlab.com).",
     };
   }
 
