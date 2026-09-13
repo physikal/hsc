@@ -1,130 +1,79 @@
 # Horseshoe Curve Outdoors
 
-Marketing site and hunt scheduling app for **Horseshoe Curve Outdoors** (Pendleton / Echo, Oregon). Guests browse packages and book open hunt slots; lodge staff manage availability in an admin panel; agents can drive the same schedule through an HTTP API.
-
-Inspired by [horseshoecurveoutdoors.com](https://horseshoecurveoutdoors.com/).
+Booking and contact site for Horseshoe Curve Outdoors.
 
 ## Stack
 
-- Next.js (App Router) + TypeScript + Tailwind CSS + shadcn/ui
-- In-memory / local JSON persistence (no cloud DB credentials required)
-- Cookie session auth for admin; Bearer token for agent API
+- Next.js (App Router) + TypeScript
+- Tailwind CSS + shadcn/ui
 
-## Vercel Toolbar
-
-Preview deployments should not show the floating Vercel Toolbar circle. Preferred disable:
-
-1. Vercel project → **Settings → General → Vercel Toolbar** → Preview **Off**
-2. Or set Preview env var `VERCEL_PREVIEW_FEEDBACK_ENABLED=0`
-
-The app also sets a CSP that omits `vercel.live` and strips any injected toolbar DOM as a fallback.
-
-## Run locally
+## Local development
 
 ```bash
 npm install
+cp .env.example .env.local
 npm run dev
 ```
 
-App: [http://127.0.0.1:43147](http://127.0.0.1:43147)
-
-```bash
-npm run build && npm run start -- --port 43147
-```
-
-## Admin access
-
-1. Open `/admin/login`
-2. Default credentials (local / mock fallback):
-   - **Username:** `admin`
-   - **Password:** `horseshoe`
-
-Set real credentials in the environment:
-
-```bash
-ADMIN_USERNAME=your-user
-ADMIN_PASSWORD=your-strong-password
-ADMIN_SESSION_SECRET=long-random-string
-AGENT_API_KEY=long-random-agent-key
-```
-
-Copy `.env.example` to `.env.local` when ready.
-
-Admin can create/edit/cancel hunt packages and slots, and confirm/cancel bookings at `/admin/dashboard`, `/admin/hunts`, and `/admin/bookings`.
+Open [http://localhost:3000](http://localhost:3000).
 
 ## AgentMail notifications
 
-Contact form and new bookings notify Josh’s monitored inbox via AgentMail **send-to-self**:
+Contact Us and booking submissions send mail via AgentMail so a monitoring agent can watch the inbox.
 
-- **From / To:** both default to `jjammer@physhlab.com` (same inbox)
-- **Reply-To:** the customer’s email
-- **API key:** must belong to Josh’s org and be able to **send as** `jjammer@physhlab.com` — do not force `hscapp2@agentmail.to` when Josh’s key owns `jjammer@`
+| Variable | Purpose |
+| --- | --- |
+| `AGENTMAIL_API_KEY` | AgentMail API key (required to send) |
+| `AGENTMAIL_NOTIFY_INBOX` | **From** address — must differ from the agent inbox |
+| `AGENTMAIL_AGENT_INBOX` | **To** address — agent-watched inbox |
 
-Server env vars (also listed in `.env.example`):
+**Critical:** `AGENTMAIL_NOTIFY_INBOX` must **not** equal `AGENTMAIL_AGENT_INBOX`.
+
+Send-to-self (`From` = `To` = `jjammer@…`) lands with AgentMail labels `sent` only — **not** `received` / `unread` — so inbox watchers that filter on those labels miss the message. Forms still return `{"ok":true}`; the gap is watchability, not form success.
+
+Recommended production values:
 
 ```bash
-AGENTMAIL_API_KEY=am_...   # required — Josh-org key that can send as jjammer@
-# Optional overrides (both default to jjammer@physhlab.com when unset):
-AGENTMAIL_NOTIFY_INBOX=jjammer@physhlab.com
+AGENTMAIL_API_KEY=am_…
+AGENTMAIL_NOTIFY_INBOX=hsc-notify@physhlab.com
 AGENTMAIL_AGENT_INBOX=jjammer@physhlab.com
 ```
 
-Booking creation still succeeds if mail delivery fails (notify is fire-and-forget).
+Fallback From (also verified received/unread): `hscapp2@agentmail.to`.
 
-### Smoke test
+| Field | Value |
+| --- | --- |
+| From | notify inbox |
+| To | agent inbox |
+| Reply-To | customer email |
+| Subjects | `[HSC Contact] …` / `[HSC Booking] …` |
 
-1. Submit `/contact` or complete a booking on `/book`.
-2. Confirm a message with subject `[HSC Contact]` or `[HSC Booking]` arrives in `jjammer@physhlab.com` (From: `jjammer@` as well).
+If notify equals agent at runtime, the app coerces From to `hsc-notify@physhlab.com` and logs a warning.
 
+Without `AGENTMAIL_API_KEY`, APIs still return success and skip send (logged).
 
-## Data persistence
+### Smoke test (agent watchability)
 
-- **Local:** writes to `data/store.json` (created automatically from seed data).
-- **Vercel / serverless:** uses an in-memory store seeded on cold start (survives warm invocations via `globalThis`). Data may reset on cold starts.
-- For durable production data, point a Turso/libSQL or similar store at this app later; the current layer is intentionally credential-free so previews deploy immediately.
+1. Submit Contact Us or create a booking on production.
+2. In AgentMail, open `jjammer@physhlab.com`.
+3. Confirm a new message with From `hsc-notify@physhlab.com` (not `jjammer@`), labels **`received`** and **`unread`**, subject `[HSC Contact]…` or `[HSC Booking]…`.
 
-## Agent / Grok-bot API
+### Vercel env checklist
 
-Base path: `/api`
+Set on Production (and Preview if needed), then redeploy:
 
-Auth for mutating admin endpoints and listing bookings:
+1. `AGENTMAIL_API_KEY` — key that can send as the notify inbox
+2. `AGENTMAIL_NOTIFY_INBOX=hsc-notify@physhlab.com`
+3. `AGENTMAIL_AGENT_INBOX=jjammer@physhlab.com`
+4. Confirm NOTIFY ≠ AGENT in the dashboard
 
-```http
-Authorization: Bearer <AGENT_API_KEY>
-```
+Helper (after `vercel login`): `/tmp/configure-hsc-agentmail-env.sh` on the agent machine, or Project → Settings → Environment Variables.
 
-Default mock key: `hco-agent-dev-key`
+## Scripts
 
-### Public
-
-| Method | Path | Description |
-|--------|------|-------------|
-| `GET` | `/api/hunts` | List active hunt packages |
-| `GET` | `/api/hunts/:id` | Get one hunt |
-| `GET` | `/api/slots?availableOnly=true` | List open slots (`huntId` optional) |
-| `GET` | `/api/slots/:id` | Get one slot (+ hunt) |
-| `POST` | `/api/bookings` | Create a guest booking |
-| `GET` | `/api/bookings/:id` | Fetch booking confirmation |
-
-### Agent / admin (Bearer or admin cookie)
-
-| Method | Path | Description |
-|--------|------|-------------|
-| `POST` | `/api/hunts` | Create hunt package |
-| `PATCH` | `/api/hunts/:id` | Update hunt |
-| `DELETE` | `/api/hunts/:id` | Cancel hunt (+ cascade cancel slots) |
-| `POST` | `/api/slots` | Create availability slot |
-| `PATCH` | `/api/slots/:id` | Update slot |
-| `DELETE` | `/api/slots/:id` | Cancel slot |
-| `GET` | `/api/bookings` | List bookings |
-| `PATCH` | `/api/bookings/:id` | Set `status` to `confirmed` or `cancelled` |
-
-## Site map
-
-- `/` — brand home
-- `/gallery` — hunts / land / lodging gallery
-- `/hunts` — package info
-- `/book` — browse slots + book
-- `/book/confirmation/:id` — confirmation
-- `/contact` — lodge contact
-- `/admin` — schedule management
+| Command | Description |
+| --- | --- |
+| `npm run dev` | Dev server |
+| `npm run build` | Production build |
+| `npm run start` | Start production server |
+| `npm run lint` | ESLint |

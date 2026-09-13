@@ -12,21 +12,32 @@ function requiredEnv(name: string): string | null {
   return value || null;
 }
 
-/** Josh preference: notify + agent are the same monitored inbox (send-to-self). */
-export const DEFAULT_AGENTMAIL_INBOX = "jjammer@physhlab.com";
+/** Destination inbox Josh's agent watches (must receive as received/unread). */
+export const DEFAULT_AGENT_INBOX = "jjammer@physhlab.com";
+/**
+ * From-inbox for app notifies. MUST differ from the agent inbox — send-to-self
+ * lands with labels `sent` (not `received`/`unread`) and agent watchers miss it.
+ * Prefer Josh-org `hsc-notify@physhlab.com`; `hscapp2@agentmail.to` also works
+ * with the HSC service-org API key.
+ */
+export const DEFAULT_NOTIFY_INBOX = "hsc-notify@physhlab.com";
 
 export function getAgentMailConfig() {
   const apiKey = requiredEnv("AGENTMAIL_API_KEY");
   if (!apiKey) {
     return null;
   }
-  // Prefer explicit AGENTMAIL_AGENT_INBOX; fall back to Josh's monitored inbox.
   const agentInbox =
-    requiredEnv("AGENTMAIL_AGENT_INBOX") ?? DEFAULT_AGENTMAIL_INBOX;
-  // Notify From-inbox: default to the same address (send-to-self). Do not force
-  // hscapp2@ — Josh's org API key that owns jjammer@ should send as jjammer@.
-  const notifyInbox =
-    requiredEnv("AGENTMAIL_NOTIFY_INBOX") ?? agentInbox;
+    requiredEnv("AGENTMAIL_AGENT_INBOX") ?? DEFAULT_AGENT_INBOX;
+  let notifyInbox =
+    requiredEnv("AGENTMAIL_NOTIFY_INBOX") ?? DEFAULT_NOTIFY_INBOX;
+  // Guard: never From==To — that produces `sent` not `received`/`unread`.
+  if (notifyInbox.toLowerCase() === agentInbox.toLowerCase()) {
+    console.warn(
+      `[agentmail] AGENTMAIL_NOTIFY_INBOX matched agent inbox (${notifyInbox}); using ${DEFAULT_NOTIFY_INBOX} so mail arrives as received/unread`,
+    );
+    notifyInbox = DEFAULT_NOTIFY_INBOX;
+  }
   return { apiKey, notifyInbox, agentInbox };
 }
 
@@ -125,7 +136,7 @@ export async function notifyContactSubmission(
     return {
       ok: false,
       error:
-        "AgentMail is not configured (set AGENTMAIL_API_KEY; optional AGENTMAIL_NOTIFY_INBOX / AGENTMAIL_AGENT_INBOX default to jjammer@physhlab.com).",
+        "AgentMail is not configured (set AGENTMAIL_API_KEY; defaults: NOTIFY=hsc-notify@physhlab.com, AGENT=jjammer@physhlab.com).",
     };
   }
 
@@ -156,7 +167,7 @@ export async function notifyBookingCreated(
     return {
       ok: false,
       error:
-        "AgentMail is not configured (set AGENTMAIL_API_KEY; optional AGENTMAIL_NOTIFY_INBOX / AGENTMAIL_AGENT_INBOX default to jjammer@physhlab.com).",
+        "AgentMail is not configured (set AGENTMAIL_API_KEY; defaults: NOTIFY=hsc-notify@physhlab.com, AGENT=jjammer@physhlab.com).",
     };
   }
 
