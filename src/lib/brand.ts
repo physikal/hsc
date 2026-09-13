@@ -12,6 +12,31 @@ export const brand = {
   instagramUrl: "https://www.instagram.com/horseshoecurvehuntclub/",
 };
 
+/**
+ * Official logo from horseshoecurveoutdoors.com (Squarespace asset HCO_Final_Logo.png).
+ * Prefer this CDN URL over any recreation.
+ */
+export const logo = {
+  src: "https://images.squarespace-cdn.com/content/v1/63dad109de284f2cc8483507/534628d3-207f-4f28-8566-f9d93e9f9376/HCO_Final_Logo.png",
+  srcDisplay:
+    "https://images.squarespace-cdn.com/content/v1/63dad109de284f2cc8483507/534628d3-207f-4f28-8566-f9d93e9f9376/HCO_Final_Logo.png?format=500w",
+  srcIcon:
+    "https://images.squarespace-cdn.com/content/v1/63dad109de284f2cc8483507/534628d3-207f-4f28-8566-f9d93e9f9376/HCO_Final_Logo.png?format=100w",
+  alt: "Horseshoe Curve Outdoors logo",
+} as const;
+
+/**
+ * “A Day in the Life…” native Squarespace video from the live homepage.
+ * No public MP4 variant; playback uses the published HLS playlist.
+ */
+export const media = {
+  dayInTheLifeTitle: "A Day in the Life…",
+  dayInTheLifeHls:
+    "https://video.squarespace-cdn.com/content/v1/63dad109de284f2cc8483507/4ed36d58-52a9-4931-af3c-c7e0c62ca7a1/playlist.m3u8",
+  dayInTheLifePoster:
+    "https://images.squarespace-cdn.com/content/v1/63dad109de284f2cc8483507/b8152293-365f-41ff-b9dd-2f664904adbc/HOME_DJI_0426-2048x1365.jpg?format=1500w",
+} as const;
+
 /** Every photo below is scraped from horseshoecurveoutdoors.com (site id 63dad109de284f2cc8483507). */
 export const imageCredit =
   "Photos from horseshoecurveoutdoors.com (site assets).";
