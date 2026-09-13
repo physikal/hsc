@@ -1,0 +1,223 @@
+{
+  "hunts": [
+    {
+      "id": "hunt_upland",
+      "title": "Fully Guided Upland Package",
+      "description": "Expert guides, top-notch dogs, and thrilling upland bird hunts across planted and wild cover along the Umatilla River. Includes clay shooting and gourmet meals at Riverview Lodge.",
+      "packageType": "upland",
+      "durationHours": 8,
+      "maxGuests": 6,
+      "pricePerGuest": 650,
+      "status": "active",
+      "createdAt": "2026-09-12T20:42:32.284Z",
+      "updatedAt": "2026-09-12T20:42:32.284Z"
+    },
+    {
+      "id": "hunt_echo",
+      "title": "Echo Lodge Guided Hunt",
+      "description": "A more casual guided hunt from Echo Lodge downriver. Comfortable lodging and flexible pacing for groups who want expert local knowledge without the full Riverview package.",
+      "packageType": "echo",
+      "durationHours": 6,
+      "maxGuests": 8,
+      "pricePerGuest": 425,
+      "status": "active",
+      "createdAt": "2026-09-12T20:42:32.284Z",
+      "updatedAt": "2026-09-12T20:42:32.284Z"
+    },
+    {
+      "id": "hunt_clays",
+      "title": "Clays & Cover Half Day",
+      "description": "Warm up with a round of sporting clays, then step into the cover for a half-day bird hunt. Ideal for introducing new hunters or tightening the team before a full package.",
+      "packageType": "clays",
+      "durationHours": 4,
+      "maxGuests": 10,
+      "pricePerGuest": 275,
+      "status": "active",
+      "createdAt": "2026-09-12T20:42:32.284Z",
+      "updatedAt": "2026-09-12T20:42:32.284Z"
+    },
+    {
+      "id": "hunt_custom",
+      "title": "Custom Echo Non-Guided Day",
+      "description": "Tailor your own day at Echo Lodge with well-stocked lodging and access to cultivated farmland cover. Perfect for experienced groups who know the ground.",
+      "packageType": "custom",
+      "durationHours": 8,
+      "maxGuests": 12,
+      "pricePerGuest": 195,
+      "status": "active",
+      "createdAt": "2026-09-12T20:42:32.284Z",
+      "updatedAt": "2026-09-12T20:42:32.284Z"
+    }
+  ],
+  "slots": [
+    {
+      "id": "slot_1",
+      "huntId": "hunt_upland",
+      "startAt": "2026-09-19T07:00:00.000Z",
+      "endAt": "2026-09-19T15:00:00.000Z",
+      "capacity": 6,
+      "bookedCount": 2,
+      "status": "open",
+      "notes": "Riverview Lodge lodging available",
+      "createdAt": "2026-09-12T20:42:32.284Z",
+      "updatedAt": "2026-09-12T20:42:32.284Z"
+    },
+    {
+      "id": "slot_2",
+      "huntId": "hunt_upland",
+      "startAt": "2026-09-26T07:00:00.000Z",
+      "endAt": "2026-09-26T15:00:00.000Z",
+      "capacity": 6,
+      "bookedCount": 0,
+      "status": "open",
+      "createdAt": "2026-09-12T20:42:32.284Z",
+      "updatedAt": "2026-09-12T20:42:32.284Z"
+    },
+    {
+      "id": "slot_3",
+      "huntId": "hunt_echo",
+      "startAt": "2026-09-17T08:00:00.000Z",
+      "endAt": "2026-09-17T14:00:00.000Z",
+      "capacity": 8,
+      "bookedCount": 3,
+      "status": "open",
+      "createdAt": "2026-09-12T20:42:32.284Z",
+      "updatedAt": "2026-09-12T20:42:32.284Z"
+    },
+    {
+      "id": "slot_4",
+      "huntId": "hunt_echo",
+      "startAt": "2026-09-24T08:00:00.000Z",
+      "endAt": "2026-09-24T14:00:00.000Z",
+      "capacity": 8,
+      "bookedCount": 8,
+      "status": "full",
+      "createdAt": "2026-09-12T20:42:32.284Z",
+      "updatedAt": "2026-09-12T20:42:32.284Z"
+    },
+    {
+      "id": "slot_5",
+      "huntId": "hunt_clays",
+      "startAt": "2026-09-15T09:00:00.000Z",
+      "endAt": "2026-09-15T13:00:00.000Z",
+      "capacity": 10,
+      "bookedCount": 6,
+      "status": "open",
+      "createdAt": "2026-09-12T20:42:32.284Z",
+      "updatedAt": "2026-09-13T00:17:45.777Z"
+    },
+    {
+      "id": "slot_6",
+      "huntId": "hunt_clays",
+      "startAt": "2026-09-22T09:00:00.000Z",
+      "endAt": "2026-09-22T13:00:00.000Z",
+      "capacity": 10,
+      "bookedCount": 0,
+      "status": "open",
+      "createdAt": "2026-09-12T20:42:32.284Z",
+      "updatedAt": "2026-09-12T20:42:32.284Z"
+    },
+    {
+      "id": "slot_7",
+      "huntId": "hunt_custom",
+      "startAt": "2026-09-21T07:00:00.000Z",
+      "endAt": "2026-09-21T15:00:00.000Z",
+      "capacity": 12,
+      "bookedCount": 4,
+      "status": "open",
+      "createdAt": "2026-09-12T20:42:32.284Z",
+      "updatedAt": "2026-09-12T20:42:32.284Z"
+    },
+    {
+      "id": "slot_8",
+      "huntId": "hunt_upland",
+      "startAt": "2026-10-03T07:00:00.000Z",
+      "endAt": "2026-10-03T15:00:00.000Z",
+      "capacity": 4,
+      "bookedCount": 0,
+      "status": "open",
+      "notes": "Small-group exclusive weekend",
+      "createdAt": "2026-09-12T20:42:32.284Z",
+      "updatedAt": "2026-09-12T20:42:32.284Z"
+    },
+    {
+      "id": "slot_7apdKDgE",
+      "huntId": "hunt_clays",
+      "startAt": "2026-11-01T16:00:00.000Z",
+      "endAt": "2026-11-01T20:00:00.000Z",
+      "capacity": 5,
+      "bookedCount": 0,
+      "status": "open",
+      "createdAt": "2026-09-12T20:42:51.359Z",
+      "updatedAt": "2026-09-12T20:42:51.359Z"
+    }
+  ],
+  "bookings": [
+    {
+      "id": "book_demo",
+      "slotId": "slot_1",
+      "huntId": "hunt_upland",
+      "guestName": "Jordan Hale",
+      "guestEmail": "jordan.hale@example.com",
+      "guestPhone": "(541) 555-0142",
+      "partySize": 2,
+      "notes": "Celebrating a birthday hunt",
+      "status": "confirmed",
+      "confirmationCode": "HCO-DEMO01",
+      "createdAt": "2026-09-12T20:42:32.284Z",
+      "updatedAt": "2026-09-12T20:42:32.284Z"
+    },
+    {
+      "id": "book_demo2",
+      "slotId": "slot_3",
+      "huntId": "hunt_echo",
+      "guestName": "Sam Rivera",
+      "guestEmail": "sam.rivera@example.com",
+      "guestPhone": "(541) 555-0198",
+      "partySize": 3,
+      "status": "confirmed",
+      "confirmationCode": "HCO-DEMO02",
+      "createdAt": "2026-09-12T20:42:32.284Z",
+      "updatedAt": "2026-09-12T20:42:32.284Z"
+    },
+    {
+      "id": "book_J-X0LXMPiq",
+      "slotId": "slot_5",
+      "huntId": "hunt_clays",
+      "guestName": "Test Guest",
+      "guestEmail": "test@example.com",
+      "guestPhone": "(541) 555-0111",
+      "partySize": 1,
+      "status": "confirmed",
+      "confirmationCode": "HCO--FOQUA",
+      "createdAt": "2026-09-12T20:42:51.242Z",
+      "updatedAt": "2026-09-12T20:42:51.242Z"
+    },
+    {
+      "id": "book_fi82ECEIr2",
+      "slotId": "slot_5",
+      "huntId": "hunt_clays",
+      "guestName": "Casey Field",
+      "guestEmail": "casey@example.com",
+      "guestPhone": "541-555-0199",
+      "partySize": 1,
+      "status": "confirmed",
+      "confirmationCode": "HCO-VPP1IT",
+      "createdAt": "2026-09-12T21:32:12.604Z",
+      "updatedAt": "2026-09-12T21:32:12.604Z"
+    },
+    {
+      "id": "book_oklRC4JzSw",
+      "slotId": "slot_5",
+      "huntId": "hunt_clays",
+      "guestName": "Test Guest",
+      "guestEmail": "test@example.com",
+      "guestPhone": "5415550100",
+      "partySize": 3,
+      "status": "confirmed",
+      "confirmationCode": "HCO-VVN7WX",
+      "createdAt": "2026-09-13T00:17:45.777Z",
+      "updatedAt": "2026-09-13T00:17:45.777Z"
+    }
+  ]
+}
