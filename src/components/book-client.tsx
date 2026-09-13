@@ -10,7 +10,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import type { SlotWithHunt } from "@/lib/types";
+import { saveBookingReceiptClient } from "@/lib/booking-receipt";
+import type { BookingWithDetails, SlotWithHunt } from "@/lib/types";
 import { cn, formatUsd } from "@/lib/utils";
 
 export function BookClient({
@@ -94,8 +95,14 @@ export function BookClient({
           notes: String(data.get("notes") || "") || undefined,
         }),
       });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error || "Booking failed");
+      const json = (await res.json()) as {
+        booking?: BookingWithDetails;
+        error?: string;
+      };
+      if (!res.ok || !json.booking) {
+        throw new Error(json.error || "Booking failed");
+      }
+      saveBookingReceiptClient(json.booking);
       router.push(`/book/confirmation/${json.booking.id}`);
     } catch (err) {
       setFormError(err instanceof Error ? err.message : "Booking failed");
