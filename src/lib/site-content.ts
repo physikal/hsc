@@ -135,7 +135,7 @@ export const dayHunts = {
   intro:
     "We offer full and half-day bird hunts at the ranch. Our hunts are fully-guided with our dogs, and your bird dogs are always welcome.",
   halfDay:
-    "We offer full and half-day bird hunts at the ranch. Our hunts are fully-guided with our dogs, and your bird dogs are always welcome.",
+    "For the half-day hunt you have the choice of breakfast or lunch. Half day hunts can be morning or afternoon. Breakfast is at 8 am and the hunt goes until approximately 12:30.",
   fullDay:
     "Full-day hunts include a light grab-and-go breakfast, a break for lunch in the Lodge and an afternoon hunt. After either hunt, relax in our saloon with a beer while your guides clean and process your birds.",
   pricing:
