@@ -70,6 +70,7 @@ AGENTMAIL_AGENT_INBOX=jjammer@physhlab.com
 
 Booking creation still succeeds if mail delivery fails (notify is fire-and-forget).
 
+
 ### Smoke test
 
 1. Submit `/contact` or complete a booking on `/book`.
