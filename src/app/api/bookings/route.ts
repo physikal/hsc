@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { notifyBookingCreatedInBackground } from "@/lib/agentmail";
 import { requireAdminOrAgent } from "@/lib/auth";
 import { createBooking, listBookings } from "@/lib/db";
 
@@ -40,6 +41,8 @@ export async function POST(req: NextRequest) {
   try {
     const body = createSchema.parse(await req.json());
     const booking = await createBooking(body);
+    // Side-effect only — booking succeeds even if AgentMail notify fails.
+    notifyBookingCreatedInBackground(booking);
     return NextResponse.json({ booking }, { status: 201 });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Invalid request";

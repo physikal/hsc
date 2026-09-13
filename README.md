@@ -52,6 +52,29 @@ Copy `.env.example` to `.env.local` when ready.
 
 Admin can create/edit/cancel hunt packages and slots, and confirm/cancel bookings at `/admin/dashboard`, `/admin/hunts`, and `/admin/bookings`.
 
+## AgentMail notifications
+
+Contact form and new bookings notify Josh’s monitored inbox via AgentMail:
+
+- **From:** `AGENTMAIL_NOTIFY_INBOX` (default `hsc-notify@physhlab.com`)
+- **To:** `AGENTMAIL_AGENT_INBOX` (default `jjammer@physhlab.com`)
+- **Reply-To:** the customer’s email
+
+Required server env vars (also listed in `.env.example`):
+
+```bash
+AGENTMAIL_API_KEY=am_...
+AGENTMAIL_NOTIFY_INBOX=hsc-notify@physhlab.com
+AGENTMAIL_AGENT_INBOX=jjammer@physhlab.com
+```
+
+Booking creation still succeeds if mail delivery fails (notify is fire-and-forget).
+
+### Smoke test
+
+1. Submit `/contact` or complete a booking on `/book`.
+2. Confirm a message with subject `[HSC Contact]` or `[HSC Booking]` arrives in `jjammer@physhlab.com`.
+
 ## Data persistence
 
 - **Local:** writes to `data/store.json` (created automatically from seed data).
