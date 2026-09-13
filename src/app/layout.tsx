@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     template: `%s | ${brand.name}`,
   },
   description:
-    "Upland bird hunts, sporting clays, and lodge hospitality along the Umatilla River just outside Pendleton, Oregon. Book guided packages online.",
+    "Premiere upland bird hunting just outside Pendleton, Oregon. Riverview Lodge, Echo Lodge, day hunts, and lodge hospitality along the Umatilla River.",
 };
 
 export default function RootLayout({
