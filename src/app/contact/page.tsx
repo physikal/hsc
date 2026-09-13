@@ -23,14 +23,21 @@ export default function ContactPage() {
       <div className="mx-auto grid max-w-6xl gap-12 px-4 py-12 md:grid-cols-2 md:px-6 md:py-16">
         <div>
           <p className="text-xs tracking-[0.22em] text-[var(--brand-moss)] uppercase">
-            Contact
+            Contact Us
           </p>
           <h1 className="mt-3 font-display text-4xl text-[var(--brand-forest-deep)] md:text-5xl">
-            {brand.name}
+            Horseshoe Curve Hunt Club
           </h1>
           <p className="mt-5 text-lg leading-relaxed text-[var(--brand-ink)]/80">
-            Reach us to ask about lodging, group sizes, or a custom Echo day.
-            Or book a published hunt slot online anytime.
+            {brand.fullAddress}
+            <br />
+            {brand.phone}
+            <br />
+            {brand.email}
+          </p>
+          <p className="mt-5 text-base leading-relaxed text-[var(--brand-ink)]/80">
+            Reach out about Riverview Lodge, Echo Lodge, day hunts, big game, or
+            turkey hunts — or make a reservation online.
           </p>
           <div className="mt-8 space-y-3 text-[var(--brand-ink)]">
             <p>{brand.fullAddress}</p>
