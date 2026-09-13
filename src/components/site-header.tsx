@@ -1,19 +1,20 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { ButtonLink } from "@/components/button-link";
 import { cn } from "@/lib/utils";
-import { brand } from "@/lib/brand";
+import { brand, logo } from "@/lib/brand";
 
 const links = [
   { href: "/", label: "Home" },
   { href: "/gallery", label: "Gallery" },
-  { href: "/hunts", label: "The Hunts" },
-  { href: "/book", label: "Book a Hunt" },
-  { href: "/contact", label: "Contact" },
+  { href: "/hunts", label: "Hunting Packages" },
+  { href: "/book", label: "Make a Reservation" },
+  { href: "/contact", label: "Contact Us" },
 ];
 
 export function SiteHeader() {
@@ -33,9 +34,21 @@ export function SiteHeader() {
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-5 md:px-6">
         <Link
           href="/"
-          className="font-display text-lg tracking-[0.08em] text-[var(--brand-cream)] uppercase md:text-xl"
+          className="flex items-center gap-3 text-[var(--brand-cream)]"
+          aria-label={brand.name}
         >
-          {brand.name}
+          <Image
+            src={logo.srcDisplay}
+            alt={logo.alt}
+            width={48}
+            height={48}
+            className="size-10 object-contain md:size-12"
+            priority
+            unoptimized
+          />
+          <span className="font-display text-lg tracking-[0.08em] uppercase md:text-xl">
+            {brand.name}
+          </span>
         </Link>
         <nav className="hidden items-center gap-7 md:flex">
           {links.map((link) => (
@@ -54,7 +67,7 @@ export function SiteHeader() {
             href="/book"
             className="bg-[var(--brand-gold)] text-[var(--brand-ink)] hover:bg-[var(--brand-gold-bright)]"
           >
-            Reserve
+            Make a Reservation
           </ButtonLink>
         </nav>
         <button
@@ -84,7 +97,7 @@ export function SiteHeader() {
               onClick={() => setOpen(false)}
               className="mt-2 bg-[var(--brand-gold)] text-[var(--brand-ink)]"
             >
-              Reserve a hunt
+              Make a Reservation
             </ButtonLink>
           </div>
         </div>

@@ -1,5 +1,6 @@
+import Image from "next/image";
 import Link from "next/link";
-import { brand } from "@/lib/brand";
+import { brand, logo } from "@/lib/brand";
 
 function FacebookIcon({ className }: { className?: string }) {
   return (
@@ -22,12 +23,23 @@ export function SiteFooter() {
     <footer className="border-t border-[var(--brand-forest)]/15 bg-[var(--brand-forest-deep)] text-[var(--brand-cream)]">
       <div className="mx-auto grid max-w-6xl gap-8 px-4 py-12 md:grid-cols-3 md:px-6">
         <div>
-          <p className="font-display text-xl tracking-[0.06em] uppercase">
-            {brand.name}
-          </p>
+          <Link href="/" className="inline-flex items-center gap-3" aria-label={brand.name}>
+            <Image
+              src={logo.srcDisplay}
+              alt={logo.alt}
+              width={56}
+              height={56}
+              className="size-12 object-contain"
+              unoptimized
+            />
+            <span className="font-display text-xl tracking-[0.06em] uppercase">
+              {brand.name}
+            </span>
+          </Link>
           <p className="mt-3 max-w-xs text-sm leading-relaxed text-[var(--brand-cream)]/75">
-            Upland bird hunts, sporting clays, and lodge hospitality along the
-            Umatilla River outside Pendleton, Oregon.
+            Premiere upland bird hunting just outside Pendleton, Oregon — Riverview
+            Lodge, Echo Lodge, sporting clays, and lodge hospitality along the
+            Umatilla River.
           </p>
           <div className="mt-5">
             <p className="text-xs tracking-[0.2em] text-[var(--brand-gold)] uppercase">
@@ -88,13 +100,13 @@ export function SiteFooter() {
               Gallery
             </Link>
             <Link href="/hunts" className="hover:text-[var(--brand-gold)]">
-              The Hunts
+              Hunting Packages
             </Link>
             <Link href="/book" className="hover:text-[var(--brand-gold)]">
-              Book a Hunt
+              Make a Reservation
             </Link>
             <Link href="/contact" className="hover:text-[var(--brand-gold)]">
-              Contact
+              Contact Us
             </Link>
             <Link href="/admin" className="hover:text-[var(--brand-gold)]">
               Admin
