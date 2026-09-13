@@ -40,9 +40,9 @@ export function SiteHeader() {
           <Image
             src={logo.srcDisplay}
             alt={logo.alt}
-            width={72}
-            height={72}
-            className="size-14 object-contain md:size-[4.25rem]"
+            width={101}
+            height={101}
+            className="size-[4.9rem] object-contain md:size-[5.95rem]"
             priority
             unoptimized
           />
@@ -53,7 +53,7 @@ export function SiteHeader() {
               key={link.href}
               href={link.href}
               className={cn(
-                "whitespace-nowrap text-[1.75rem] leading-none tracking-wide text-[var(--brand-cream)]/85 transition hover:text-[var(--brand-gold)]",
+                "whitespace-nowrap text-[1.4875rem] leading-none tracking-wide text-[var(--brand-cream)]/85 transition hover:text-[var(--brand-gold)]",
                 pathname === link.href && "text-[var(--brand-gold)]",
               )}
             >
@@ -63,7 +63,7 @@ export function SiteHeader() {
           <ButtonLink
             href="/book"
             size="lg"
-            className="shrink-0 whitespace-nowrap bg-[var(--brand-gold)] text-base text-[var(--brand-ink)] hover:bg-[var(--brand-gold-bright)]"
+            className="shrink-0 whitespace-nowrap bg-[var(--brand-gold)] text-[0.95rem] text-[var(--brand-ink)] hover:bg-[var(--brand-gold-bright)]"
           >
             Make a Reservation
           </ButtonLink>
@@ -85,7 +85,7 @@ export function SiteHeader() {
                 key={link.href}
                 href={link.href}
                 onClick={() => setOpen(false)}
-                className="py-1 text-[1.75rem] leading-snug text-[var(--brand-cream)]"
+                className="py-1 text-[1.4875rem] leading-snug text-[var(--brand-cream)]"
               >
                 {link.label}
               </Link>
@@ -94,7 +94,7 @@ export function SiteHeader() {
               href="/book"
               onClick={() => setOpen(false)}
               size="lg"
-              className="mt-2 bg-[var(--brand-gold)] text-base text-[var(--brand-ink)]"
+              className="mt-2 bg-[var(--brand-gold)] text-[0.95rem] text-[var(--brand-ink)]"
             >
               Make a Reservation
             </ButtonLink>
