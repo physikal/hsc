@@ -3,7 +3,7 @@ import { Libre_Baskerville, Karla } from "next/font/google";
 import { HideVercelToolbar } from "@/components/hide-vercel-toolbar";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
-import { brand } from "@/lib/brand";
+import { brand, logo } from "@/lib/brand";
 import "./globals.css";
 
 const display = Libre_Baskerville({
@@ -23,7 +23,11 @@ export const metadata: Metadata = {
     template: `%s | ${brand.name}`,
   },
   description:
-    "Upland bird hunts, sporting clays, and lodge hospitality along the Umatilla River just outside Pendleton, Oregon. Book guided packages online.",
+    "Premiere upland bird hunting just outside Pendleton, Oregon. Riverview Lodge, Echo Lodge, day hunts, and lodge hospitality along the Umatilla River.",
+  icons: {
+    icon: [{ url: logo.srcIcon, type: "image/webp" }],
+    apple: [{ url: logo.srcDisplay }],
+  },
 };
 
 export default function RootLayout({
