@@ -18,7 +18,7 @@ export default function HomePage() {
           sizes="100vw"
         />
         <div className="hero-veil absolute inset-0" />
-        <div className="relative z-10 flex min-h-[100svh] items-end px-4 pb-16 pt-28 md:items-center md:pb-24 md:px-6">
+        <div className="relative z-10 flex min-h-[100svh] items-end px-4 pb-16 pt-28 md:items-center md:px-6 md:pb-24">
           <div className="mx-auto w-full max-w-6xl">
             <p className="fade-up font-display text-3xl leading-none tracking-[0.06em] text-[var(--brand-cream)] uppercase sm:text-5xl md:text-6xl lg:text-7xl">
               {brand.name}
