@@ -1,13 +1,12 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { ButtonLink } from "@/components/button-link";
 import { cn } from "@/lib/utils";
-import { brand, logo } from "@/lib/brand";
+import { brand } from "@/lib/brand";
 
 const links = [
   { href: "/", label: "Home" },
@@ -34,21 +33,9 @@ export function SiteHeader() {
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-5 md:px-6">
         <Link
           href="/"
-          className="flex items-center gap-3 text-[var(--brand-cream)]"
-          aria-label={brand.name}
+          className="font-display text-lg tracking-[0.08em] text-[var(--brand-cream)] uppercase md:text-xl"
         >
-          <Image
-            src={logo.srcDisplay}
-            alt={logo.alt}
-            width={48}
-            height={48}
-            className="size-10 object-contain md:size-12"
-            priority
-            unoptimized
-          />
-          <span className="font-display text-lg tracking-[0.08em] uppercase md:text-xl">
-            {brand.name}
-          </span>
+          {brand.name}
         </Link>
         <nav className="hidden items-center gap-7 md:flex">
           {links.map((link) => (
