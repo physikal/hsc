@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { notifyBookingCreatedInBackground } from "@/lib/agentmail";
 import { requireAdminOrAgent } from "@/lib/auth";
+import {
+  bookingReceiptCookieName,
+  encodeBookingReceipt,
+} from "@/lib/booking-receipt";
 import { createBooking, listBookings } from "@/lib/db";
 
 export const runtime = "nodejs";
@@ -43,7 +47,20 @@ export async function POST(req: NextRequest) {
     const booking = await createBooking(body);
     // Side-effect only — booking succeeds even if AgentMail notify fails.
     notifyBookingCreatedInBackground(booking);
-    return NextResponse.json({ booking }, { status: 201 });
+
+    const response = NextResponse.json({ booking }, { status: 201 });
+    // Persist a per-guest receipt cookie so confirmation works across
+    // serverless instances that do not share the in-memory store.
+    response.cookies.set({
+      name: bookingReceiptCookieName(booking.id),
+      value: encodeBookingReceipt(booking),
+      httpOnly: true,
+      sameSite: "lax",
+      path: "/",
+      maxAge: 60 * 60 * 24 * 14,
+      secure: process.env.NODE_ENV === "production",
+    });
+    return response;
   } catch (error) {
     const message = error instanceof Error ? error.message : "Invalid request";
     const status =
