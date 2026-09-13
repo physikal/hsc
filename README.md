@@ -54,27 +54,28 @@ Admin can create/edit/cancel hunt packages and slots, and confirm/cancel booking
 
 ## AgentMail notifications
 
-Contact form and new bookings notify Josh’s monitored inbox via AgentMail:
+Contact form and new bookings notify Josh’s monitored inbox via AgentMail **send-to-self**:
 
-- **From:** `AGENTMAIL_NOTIFY_INBOX` (default `hsc-notify@physhlab.com`)
-- **To:** `AGENTMAIL_AGENT_INBOX` (default `jjammer@physhlab.com`)
+- **From / To:** both default to `jjammer@physhlab.com` (same inbox)
 - **Reply-To:** the customer’s email
+- **API key:** must belong to Josh’s org and be able to **send as** `jjammer@physhlab.com` — do not force `hscapp2@agentmail.to` when Josh’s key owns `jjammer@`
 
-Required server env vars (also listed in `.env.example`):
+Server env vars (also listed in `.env.example`):
 
 ```bash
-AGENTMAIL_API_KEY=am_...
-AGENTMAIL_NOTIFY_INBOX=hsc-notify@physhlab.com
+AGENTMAIL_API_KEY=am_...   # required — Josh-org key that can send as jjammer@
+# Optional overrides (both default to jjammer@physhlab.com when unset):
+AGENTMAIL_NOTIFY_INBOX=jjammer@physhlab.com
 AGENTMAIL_AGENT_INBOX=jjammer@physhlab.com
 ```
 
 Booking creation still succeeds if mail delivery fails (notify is fire-and-forget).
 
-
 ### Smoke test
 
 1. Submit `/contact` or complete a booking on `/book`.
-2. Confirm a message with subject `[HSC Contact]` or `[HSC Booking]` arrives in `jjammer@physhlab.com`.
+2. Confirm a message with subject `[HSC Contact]` or `[HSC Booking]` arrives in `jjammer@physhlab.com` (From: `jjammer@` as well).
+
 
 ## Data persistence
 
