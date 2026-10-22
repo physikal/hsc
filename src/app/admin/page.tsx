@@ -1,8 +1,9 @@
 import { redirect } from "next/navigation";
-import { getAdminSessionFromCookies } from "@/lib/auth";
+import { requireAdmin } from "@/lib/auth";
+
+export const dynamic = "force-dynamic";
 
 export default async function AdminIndexPage() {
-  const session = await getAdminSessionFromCookies();
-  if (!session) redirect("/admin/login");
+  await requireAdmin();
   redirect("/admin/dashboard");
 }

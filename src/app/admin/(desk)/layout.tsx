@@ -1,15 +1,15 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { getAdminSessionFromCookies } from "@/lib/auth";
+import { requireAdmin } from "@/lib/auth";
 import { AdminLogoutButton } from "@/components/admin-logout-button";
+
+export const dynamic = "force-dynamic";
 
 export default async function AdminDashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const session = await getAdminSessionFromCookies();
-  if (!session) redirect("/admin/login");
+  const session = await requireAdmin();
 
   return (
     <div className="pt-24">

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { requireAdminOrAgent } from "@/lib/auth";
+import { requireAdmin } from "@/lib/auth";
 import { cancelHunt, getHunt, updateHunt } from "@/lib/db";
 
 export const runtime = "nodejs";
@@ -19,6 +19,7 @@ export async function GET(
   _req: NextRequest,
   ctx: { params: Promise<{ id: string }> },
 ) {
+  // Public catalog record. No guest or booking fields.
   try {
     const { id } = await ctx.params;
     const hunt = await getHunt(id);
@@ -38,10 +39,8 @@ export async function PATCH(
   req: NextRequest,
   ctx: { params: Promise<{ id: string }> },
 ) {
-  const auth = await requireAdminOrAgent(req);
-  if (!auth) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const auth = await requireAdmin(req);
+  if (auth instanceof NextResponse) return auth;
   try {
     const { id } = await ctx.params;
     const body = patchSchema.parse(await req.json());
@@ -65,10 +64,8 @@ export async function DELETE(
   req: NextRequest,
   ctx: { params: Promise<{ id: string }> },
 ) {
-  const auth = await requireAdminOrAgent(req);
-  if (!auth) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const auth = await requireAdmin(req);
+  if (auth instanceof NextResponse) return auth;
   try {
     const { id } = await ctx.params;
     const hunt = await cancelHunt(id);

@@ -6,7 +6,8 @@
     "dev": "next dev --port 43147",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "node --experimental-strip-types --test --test-timeout 180000 tests/admin-auth.test.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",
