@@ -24,6 +24,13 @@ const DASHBOARD_RENDER_MARKERS = [
   "Manage hunt packages, availability slots, and guest bookings.",
 ];
 
+const PAGE_SHELL_MARKERS = [
+  ...DASHBOARD_RENDER_MARKERS,
+  "Loading bookings",
+  "Hunts & slots",
+  "New hunt package",
+];
+
 type StoredBooking = {
   id?: string;
   guestName?: string;
@@ -150,12 +157,33 @@ async function adminCookie() {
   return `hco_admin_session=${token}`;
 }
 
+function assertEmptyProtectedRedirect(
+  result: HttpResult,
+  label: string,
+  bookings: StoredBooking[],
+) {
+  assert.equal(
+    result.body.length,
+    0,
+    `${label} redirect body was not empty (${result.body.length} bytes)`,
+  );
+  assertNoBookingData(result, label, bookings);
+  for (const marker of PAGE_SHELL_MARKERS) {
+    assert.equal(result.body.includes(marker), false, `${label} still rendered admin UI`);
+  }
+}
+
 function assertNoBookingData(result: HttpResult, label: string, bookings: StoredBooking[]) {
   const leak = leakLabel(result.body, bookings);
   assert.equal(
     leak,
     null,
     `${label} body contains ${leak ?? "booking/guest data"} (status ${result.status}, ${result.body.length} bytes)`,
+  );
+  assert.equal(
+    /HCO-[A-Za-z0-9]+/.test(result.body),
+    false,
+    `${label} body contains a confirmation code (status ${result.status}, ${result.body.length} bytes)`,
   );
 }
 
@@ -215,9 +243,14 @@ describe("admin auth source guards", () => {
       path.join(repoRoot, "src/app/admin/(desk)/dashboard/page.tsx"),
       "utf8",
     );
+    assert.match(dashboard, /requireAdmin\(/);
+    const loader = readFileSync(
+      path.join(repoRoot, "src/lib/admin-dashboard.ts"),
+      "utf8",
+    );
     assert.ok(
-      dashboard.indexOf("requireAdmin(") < dashboard.indexOf("listBookings("),
-      "dashboard must authorize before listBookings",
+      loader.indexOf("requireAdmin(") < loader.indexOf("listBookings("),
+      "dashboard loader must authorize before listBookings",
     );
 
     const bookingRoute = readFileSync(
@@ -286,33 +319,65 @@ describe("logged-out admin responses", { concurrency: 1 }, () => {
     }
   });
 
-  test("logged-out admin pages redirect or 401 with no booking or guest data", async () => {
+  test("logged-out admin pages redirect with an empty body and no booking or guest data", async () => {
     const bookings = loadBookings();
     assert.ok(bookings.length > 0, "store must contain bookings so the leak check is real");
 
+    const variants: Array<{
+      method: string;
+      suffix: string;
+      headers?: Record<string, string>;
+      body?: string;
+    }> = [
+      { method: "GET", suffix: "" },
+      { method: "GET", suffix: "", headers: { RSC: "1" } },
+      { method: "GET", suffix: "?_rsc=1" },
+      { method: "GET", suffix: "?_rsc=1", headers: { RSC: "1" } },
+      { method: "POST", suffix: "", body: "[]" },
+      { method: "POST", suffix: "", headers: { RSC: "1" }, body: "[]" },
+      {
+        method: "POST",
+        suffix: "?_rsc=1",
+        headers: { RSC: "1", "next-action": "0000000000000000000000000000000000000000" },
+        body: "[]",
+      },
+    ];
+
     for (const page of PROTECTED_PAGES) {
-      for (const headers of [
-        undefined,
-        { RSC: "1", Accept: "text/x-component" },
-      ]) {
-        const result = await request("GET", page, { headers });
-        const label = `GET ${page}${headers ? " (rsc)" : ""}`;
-        assert.ok(
-          REDIRECT_OR_DENIED.has(result.status),
+      for (const variant of variants) {
+        const result = await request(variant.method, `${page}${variant.suffix}`, {
+          headers: variant.headers,
+          body: variant.body,
+        });
+        const label = `${variant.method} ${page}${variant.suffix}${variant.headers?.RSC ? " RSC" : ""}${variant.headers?.["next-action"] ? " action" : ""}`;
+        assert.equal(
+          result.status,
+          307,
           `${label} returned ${result.status} location=${result.location} bytes=${result.body.length}`,
         );
-        if (result.status !== 401) {
+        assertEmptyProtectedRedirect(result, label, bookings);
+
+        // Next answers a bare RSC header with an empty 307 onto ?_rsc.
+        // The flight request itself must still be the empty login redirect.
+        const pagePath = page.split("?")[0];
+        if (
+          result.location.startsWith(`${pagePath}?_rsc`) &&
+          !result.location.includes("/admin/login")
+        ) {
+          const flight = await request(variant.method, result.location, {
+            headers: { ...(variant.headers ?? {}), RSC: "1" },
+            body: variant.body,
+          });
+          const flightLabel = `${label} -> ${result.location}`;
+          assert.equal(
+            flight.status,
+            307,
+            `${flightLabel} returned ${flight.status} location=${flight.location} bytes=${flight.body.length}`,
+          );
+          assert.match(flight.location, /\/admin\/login/);
+          assertEmptyProtectedRedirect(flight, flightLabel, bookings);
+        } else {
           assert.match(result.location, /\/admin\/login/);
-        }
-        assertNoBookingData(result, label, bookings);
-        if (page === "/admin/dashboard") {
-          for (const marker of DASHBOARD_RENDER_MARKERS) {
-            assert.equal(
-              result.body.includes(marker),
-              false,
-              `${label} still rendered the dashboard`,
-            );
-          }
         }
       }
     }
@@ -324,6 +389,22 @@ describe("logged-out admin responses", { concurrency: 1 }, () => {
     assert.equal(login.status, 200, `login status ${login.status}`);
     assert.equal(login.location, "");
     assertNoBookingData(login, "GET /admin/login", bookings);
+
+    const loginRsc = await request("GET", "/admin/login?_rsc=1", {
+      headers: { RSC: "1" },
+    });
+    if (loginRsc.status === 307) {
+      assert.match(loginRsc.location, /\/admin\/login/);
+      assert.equal(loginRsc.body.length, 0);
+      const flight = await request("GET", loginRsc.location, {
+        headers: { RSC: "1" },
+      });
+      assert.equal(flight.status, 200, `login flight status ${flight.status}`);
+      assertNoBookingData(flight, "GET /admin/login RSC flight", bookings);
+    } else {
+      assert.equal(loginRsc.status, 200);
+    }
+    assertNoBookingData(loginRsc, "GET /admin/login?_rsc=1", bookings);
 
     const asset = await request("GET", "/admin/login/logo.png");
     assert.ok(
@@ -340,7 +421,9 @@ describe("logged-out admin responses", { concurrency: 1 }, () => {
     const result = await request("GET", "/admin/dashboard", {
       cookie: "hco_admin_session=not-a-valid-token",
     });
-    assert.ok(REDIRECT_OR_DENIED.has(result.status));
+    assert.equal(result.status, 307);
+    assert.match(result.location, /\/admin\/login/);
+    assert.equal(result.body.length, 0);
     assertNoBookingData(result, "GET /admin/dashboard invalid cookie", bookings);
   });
 

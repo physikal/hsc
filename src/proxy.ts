@@ -24,7 +24,13 @@ export async function proxy(request: NextRequest) {
   const session = token ? await verifyAdminToken(token) : null;
   if (session) return NextResponse.next();
 
-  return NextResponse.redirect(new URL("/admin/login", request.url), 307);
+  // Rewrite, rather than NextResponse.redirect. A proxy redirect is finished
+  // with res.end(location), so the URL string becomes the body. The handler
+  // below returns 307 with a null body before any admin page or action runs.
+  const gate = request.nextUrl.clone();
+  gate.pathname = "/api/admin-auth-redirect";
+  gate.search = "";
+  return NextResponse.rewrite(gate);
 }
 
 export const config = {

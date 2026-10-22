@@ -1,19 +1,14 @@
 import Link from "next/link";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
+import { loadAdminDashboard } from "@/lib/admin-dashboard";
 import { requireAdmin } from "@/lib/auth";
-import { listBookings, listHunts, listSlots } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminDashboardPage() {
   await requireAdmin();
-
-  const [hunts, slots, bookings] = await Promise.all([
-    listHunts({ includeCancelled: true }),
-    listSlots({ includeCancelled: true }),
-    listBookings({ includeCancelled: true }),
-  ]);
+  const { hunts, slots, bookings } = await loadAdminDashboard();
 
   const openSlots = slots.filter((s) => s.status === "open").length;
   const confirmed = bookings.filter((b) => b.status === "confirmed").length;
