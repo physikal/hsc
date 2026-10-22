@@ -3,7 +3,7 @@
 import { format } from "date-fns";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -40,14 +40,10 @@ export function BookClient({
   const maxParty = selected
     ? Math.min(selected.remaining, selected.hunt.maxGuests)
     : 12;
-
-  useEffect(() => {
-    if (!selected) return;
-    setPartySize((prev) => Math.min(Math.max(1, prev), maxParty));
-  }, [selected, maxParty]);
+  const partySizeForSlot = Math.min(Math.max(1, partySize), maxParty);
 
   const grandTotal = selected
-    ? selected.hunt.pricePerGuest * partySize
+    ? selected.hunt.pricePerGuest * partySizeForSlot
     : 0;
 
   async function refresh() {
@@ -73,7 +69,7 @@ export function BookClient({
       setFormError("Select a hunt slot first.");
       return;
     }
-    if (partySize < 1 || partySize > maxParty) {
+    if (partySizeForSlot < 1 || partySizeForSlot > maxParty) {
       setFormError(
         `Party size must be between 1 and ${maxParty} for this slot.`,
       );
@@ -91,7 +87,7 @@ export function BookClient({
           guestName: String(data.get("guestName") || ""),
           guestEmail: String(data.get("guestEmail") || ""),
           guestPhone: String(data.get("guestPhone") || ""),
-          partySize,
+          partySize: partySizeForSlot,
           notes: String(data.get("notes") || "") || undefined,
         }),
       });
@@ -257,7 +253,7 @@ export function BookClient({
                 type="number"
                 min={1}
                 max={maxParty}
-                value={partySize}
+                value={partySizeForSlot}
                 onChange={(e) => {
                   const next = Number(e.target.value);
                   if (Number.isNaN(next)) {
@@ -316,7 +312,7 @@ export function BookClient({
                   </div>
                   <div className="flex justify-between gap-4">
                     <dt className="text-[var(--brand-ink)]/55">Party size</dt>
-                    <dd className="text-right">{partySize}</dd>
+                    <dd className="text-right">{partySizeForSlot}</dd>
                   </div>
                   <div className="flex justify-between gap-4">
                     <dt className="text-[var(--brand-ink)]/55">
@@ -336,8 +332,9 @@ export function BookClient({
                   </div>
                 </dl>
                 <p className="text-xs text-[var(--brand-ink)]/55">
-                  {formatUsd(selected.hunt.pricePerGuest)} × {partySize} guest
-                  {partySize === 1 ? "" : "s"}
+                  {formatUsd(selected.hunt.pricePerGuest)} × {partySizeForSlot}{" "}
+                  guest
+                  {partySizeForSlot === 1 ? "" : "s"}
                 </p>
               </div>
             ) : null}

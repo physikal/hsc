@@ -7,6 +7,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { BookingWithDetails } from "@/lib/types";
 
+async function fetchBookings(): Promise<BookingWithDetails[]> {
+  const res = await fetch("/api/bookings?includeCancelled=true");
+  const json = await res.json();
+  if (!res.ok) throw new Error(json.error || "Failed to load bookings");
+  return json.bookings as BookingWithDetails[];
+}
+
 export default function AdminBookingsPage() {
   const [bookings, setBookings] = useState<BookingWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
@@ -16,10 +23,7 @@ export default function AdminBookingsPage() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/api/bookings?includeCancelled=true");
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error || "Failed to load bookings");
-      setBookings(json.bookings);
+      setBookings(await fetchBookings());
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load");
     } finally {
@@ -28,8 +32,23 @@ export default function AdminBookingsPage() {
   }, []);
 
   useEffect(() => {
-    void load();
-  }, [load]);
+    let cancelled = false;
+    void fetchBookings()
+      .then((nextBookings) => {
+        if (cancelled) return;
+        setBookings(nextBookings);
+        setError(null);
+        setLoading(false);
+      })
+      .catch((err: unknown) => {
+        if (cancelled) return;
+        setError(err instanceof Error ? err.message : "Failed to load");
+        setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   async function setStatus(id: string, status: "confirmed" | "cancelled") {
     const res = await fetch(`/api/bookings/${id}`, {
