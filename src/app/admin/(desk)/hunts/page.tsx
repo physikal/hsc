@@ -23,6 +23,24 @@ function toLocalInput(iso: string) {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
+async function fetchSchedule(): Promise<{
+  hunts: Hunt[];
+  slots: SlotWithHunt[];
+}> {
+  const [huntsRes, slotsRes] = await Promise.all([
+    fetch("/api/hunts?includeCancelled=true"),
+    fetch("/api/slots?includeCancelled=true"),
+  ]);
+  const huntsJson = await huntsRes.json();
+  const slotsJson = await slotsRes.json();
+  if (!huntsRes.ok) throw new Error(huntsJson.error || "Failed to load hunts");
+  if (!slotsRes.ok) throw new Error(slotsJson.error || "Failed to load slots");
+  return {
+    hunts: huntsJson.hunts as Hunt[],
+    slots: slotsJson.slots as SlotWithHunt[],
+  };
+}
+
 export default function AdminHuntsPage() {
   const [hunts, setHunts] = useState<Hunt[]>([]);
   const [slots, setSlots] = useState<SlotWithHunt[]>([]);
@@ -37,16 +55,9 @@ export default function AdminHuntsPage() {
     setLoading(true);
     setError(null);
     try {
-      const [huntsRes, slotsRes] = await Promise.all([
-        fetch("/api/hunts?includeCancelled=true"),
-        fetch("/api/slots?includeCancelled=true"),
-      ]);
-      const huntsJson = await huntsRes.json();
-      const slotsJson = await slotsRes.json();
-      if (!huntsRes.ok) throw new Error(huntsJson.error || "Failed to load hunts");
-      if (!slotsRes.ok) throw new Error(slotsJson.error || "Failed to load slots");
-      setHunts(huntsJson.hunts);
-      setSlots(slotsJson.slots);
+      const schedule = await fetchSchedule();
+      setHunts(schedule.hunts);
+      setSlots(schedule.slots);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load");
     } finally {
@@ -55,8 +66,24 @@ export default function AdminHuntsPage() {
   }, []);
 
   useEffect(() => {
-    void load();
-  }, [load]);
+    let cancelled = false;
+    void fetchSchedule()
+      .then((schedule) => {
+        if (cancelled) return;
+        setHunts(schedule.hunts);
+        setSlots(schedule.slots);
+        setError(null);
+        setLoading(false);
+      })
+      .catch((err: unknown) => {
+        if (cancelled) return;
+        setError(err instanceof Error ? err.message : "Failed to load");
+        setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   async function createHunt(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import {
   BookingConfirmation,
   BookingConfirmationMissing,
@@ -8,14 +8,26 @@ import {
 import { loadBookingReceiptClient } from "@/lib/booking-receipt";
 import type { BookingWithDetails } from "@/lib/types";
 
-export function BookingConfirmationClient({ id }: { id: string }) {
-  const [booking, setBooking] = useState<
-    BookingWithDetails | null | undefined
-  >(undefined);
+function subscribeToBookingReceipt() {
+  return () => {};
+}
 
-  useEffect(() => {
-    setBooking(loadBookingReceiptClient(id));
-  }, [id]);
+const receiptSnapshots = new Map<string, BookingWithDetails | null>();
+
+function readBookingReceiptSnapshot(id: string): BookingWithDetails | null {
+  const cached = receiptSnapshots.get(id);
+  if (cached !== undefined) return cached;
+  const booking = loadBookingReceiptClient(id);
+  receiptSnapshots.set(id, booking);
+  return booking;
+}
+
+export function BookingConfirmationClient({ id }: { id: string }) {
+  const booking = useSyncExternalStore(
+    subscribeToBookingReceipt,
+    () => readBookingReceiptSnapshot(id),
+    () => undefined,
+  );
 
   if (booking === undefined) {
     return (
