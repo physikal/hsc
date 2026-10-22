@@ -1,11 +1,14 @@
 import Link from "next/link";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
+import { requireAdmin } from "@/lib/auth";
 import { listBookings, listHunts, listSlots } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminDashboardPage() {
+  await requireAdmin();
+
   const [hunts, slots, bookings] = await Promise.all([
     listHunts({ includeCancelled: true }),
     listSlots({ includeCancelled: true }),

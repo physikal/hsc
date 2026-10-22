@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { notifyBookingCreated } from "@/lib/agentmail";
-import { requireAdminOrAgent } from "@/lib/auth";
+import { requireAdmin } from "@/lib/auth";
 import {
   bookingReceiptCookieName,
   encodeBookingReceipt,
@@ -20,10 +20,8 @@ const createSchema = z.object({
 });
 
 export async function GET(req: NextRequest) {
-  const auth = await requireAdminOrAgent(req);
-  if (!auth) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const auth = await requireAdmin(req);
+  if (auth instanceof NextResponse) return auth;
   try {
     const slotId = req.nextUrl.searchParams.get("slotId") ?? undefined;
     const includeCancelled =
@@ -42,6 +40,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  // Public guest checkout. The response is the booking the guest just created.
   try {
     const body = createSchema.parse(await req.json());
     const booking = await createBooking(body);

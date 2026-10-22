@@ -1,48 +1,31 @@
-import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
-import { NextRequest } from "next/server";
+import { redirect } from "next/navigation";
+import { NextRequest, NextResponse } from "next/server";
+import {
+  ADMIN_SESSION_COOKIE,
+  createAdminSessionToken,
+  getAdminCredentials,
+  getAgentApiKey,
+  readBearerToken,
+  verifyAdminToken,
+  type AdminSession,
+} from "@/lib/admin-session";
 
-const COOKIE_NAME = "hco_admin_session";
+export {
+  ADMIN_SESSION_COOKIE as COOKIE_NAME,
+  createAdminSessionToken,
+  getAdminCredentials,
+  getAgentApiKey,
+};
+export type { AdminSession };
 
-function secretKey() {
-  const secret =
-    process.env.ADMIN_SESSION_SECRET ||
-    "hco-dev-secret-change-me-in-production";
-  return new TextEncoder().encode(secret);
-}
-
-export function getAdminCredentials() {
-  return {
-    username: process.env.ADMIN_USERNAME || "admin",
-    password: process.env.ADMIN_PASSWORD || "horseshoe",
-  };
-}
-
-export function getAgentApiKey() {
-  return process.env.AGENT_API_KEY || "hco-agent-dev-key";
-}
-
-export async function createAdminSessionToken(username: string) {
-  return new SignJWT({ role: "admin", username })
-    .setProtectedHeader({ alg: "HS256" })
-    .setIssuedAt()
-    .setExpirationTime("7d")
-    .sign(secretKey());
-}
-
-export async function verifyAdminToken(token: string) {
-  try {
-    const { payload } = await jwtVerify(token, secretKey());
-    if (payload.role !== "admin") return null;
-    return payload as { role: string; username: string };
-  } catch {
-    return null;
-  }
-}
+export type AdminAccess =
+  | { type: "admin"; session: AdminSession }
+  | { type: "agent" };
 
 export async function setAdminSessionCookie(token: string) {
   const jar = await cookies();
-  jar.set(COOKIE_NAME, token, {
+  jar.set(ADMIN_SESSION_COOKIE, token, {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
@@ -53,38 +36,59 @@ export async function setAdminSessionCookie(token: string) {
 
 export async function clearAdminSessionCookie() {
   const jar = await cookies();
-  jar.delete(COOKIE_NAME);
+  jar.delete(ADMIN_SESSION_COOKIE);
 }
 
 export async function getAdminSessionFromCookies() {
   const jar = await cookies();
-  const token = jar.get(COOKIE_NAME)?.value;
+  const token = jar.get(ADMIN_SESSION_COOKIE)?.value;
   if (!token) return null;
   return verifyAdminToken(token);
 }
 
 export function getBearerToken(req: NextRequest): string | null {
-  const header = req.headers.get("authorization");
-  if (!header) return null;
-  const [scheme, token] = header.split(" ");
-  if (scheme?.toLowerCase() !== "bearer" || !token) return null;
-  return token;
+  return readBearerToken(req.headers.get("authorization"));
 }
 
-export async function requireAdminOrAgent(req: NextRequest) {
+export async function requireAdminOrAgent(
+  req: NextRequest,
+): Promise<AdminAccess | null> {
   const agentKey = getAgentApiKey();
   const bearer = getBearerToken(req);
   if (bearer && bearer === agentKey) {
-    return { type: "agent" as const };
+    return { type: "agent" };
   }
 
-  const cookieToken = req.cookies.get(COOKIE_NAME)?.value;
+  const cookieToken = req.cookies.get(ADMIN_SESSION_COOKIE)?.value;
   if (cookieToken) {
     const session = await verifyAdminToken(cookieToken);
-    if (session) return { type: "admin" as const, session };
+    if (session) return { type: "admin", session };
   }
 
   return null;
 }
 
-export { COOKIE_NAME };
+/**
+ * Page and layout guard. Redirects to the login page before the caller
+ * fetches any admin data. Pass a request to guard a route handler: that
+ * form returns 401 JSON (or an admin/agent principal) and does not redirect.
+ */
+export async function requireAdmin(): Promise<AdminSession>;
+export async function requireAdmin(
+  req: NextRequest,
+): Promise<AdminAccess | NextResponse>;
+export async function requireAdmin(
+  req?: NextRequest,
+): Promise<AdminSession | AdminAccess | NextResponse> {
+  if (req) {
+    const auth = await requireAdminOrAgent(req);
+    if (!auth) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    return auth;
+  }
+
+  const session = await getAdminSessionFromCookies();
+  if (!session) redirect("/admin/login");
+  return session;
+}

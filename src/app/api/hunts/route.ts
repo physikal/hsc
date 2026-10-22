@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { requireAdminOrAgent } from "@/lib/auth";
+import { requireAdmin } from "@/lib/auth";
 import { createHunt, listHunts } from "@/lib/db";
 
 export const runtime = "nodejs";
@@ -16,15 +16,13 @@ const createSchema = z.object({
 });
 
 export async function GET(req: NextRequest) {
+  const includeCancelled =
+    req.nextUrl.searchParams.get("includeCancelled") === "true";
+  if (includeCancelled) {
+    const auth = await requireAdmin(req);
+    if (auth instanceof NextResponse) return auth;
+  }
   try {
-    const includeCancelled =
-      req.nextUrl.searchParams.get("includeCancelled") === "true";
-    if (includeCancelled) {
-      const auth = await requireAdminOrAgent(req);
-      if (!auth) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-      }
-    }
     const hunts = await listHunts({ includeCancelled });
     return NextResponse.json({ hunts });
   } catch (error) {
@@ -36,10 +34,8 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const auth = await requireAdminOrAgent(req);
-  if (!auth) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const auth = await requireAdmin(req);
+  if (auth instanceof NextResponse) return auth;
   try {
     const body = createSchema.parse(await req.json());
     const hunt = await createHunt(body);

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { requireAdminOrAgent } from "@/lib/auth";
+import { requireAdmin } from "@/lib/auth";
 import { getBooking, updateBookingStatus } from "@/lib/db";
 
 export const runtime = "nodejs";
@@ -10,9 +10,11 @@ const patchSchema = z.object({
 });
 
 export async function GET(
-  _req: NextRequest,
+  req: NextRequest,
   ctx: { params: Promise<{ id: string }> },
 ) {
+  const auth = await requireAdmin(req);
+  if (auth instanceof NextResponse) return auth;
   try {
     const { id } = await ctx.params;
     const booking = await getBooking(id);
@@ -34,10 +36,8 @@ export async function PATCH(
   req: NextRequest,
   ctx: { params: Promise<{ id: string }> },
 ) {
-  const auth = await requireAdminOrAgent(req);
-  if (!auth) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const auth = await requireAdmin(req);
+  if (auth instanceof NextResponse) return auth;
   try {
     const { id } = await ctx.params;
     const body = patchSchema.parse(await req.json());
